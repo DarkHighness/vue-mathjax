@@ -1,11 +1,11 @@
 {
-  "name": "vue3-mathjax3",
+  "name": "vue3-mathjax",
   "private": false,
   "version": "0.0.1",
-  "main": "dist/vue3-mathjax3.umd.js",
-  "module": "dist/vue3-mathjax3.es.js",
+  "main": "dist/vue3-mathjax.umd.js",
+  "module": "dist/vue3-mathjax.es.js",
   "types": "types/index.d.ts",
-  "description": "A vue component for MathJax",
+  "description": "A Vue 3 component for MathJax",
   "homepage": "https://github.com/DarkHighness/vue-mathjax",
   "repository": {
     "type": "git",
