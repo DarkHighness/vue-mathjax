@@ -1,6 +1,6 @@
 # Vue MathJax
 
-This is a vue mathjax component, which uses slots instead of passing formula as prop.
+This is a vue 3 MathJax component, which uses slots instead of passing formula as prop.
 
 # Usage
 
