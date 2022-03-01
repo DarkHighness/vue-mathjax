@@ -15,7 +15,8 @@
     "url": "https://github.com/DarkHighness/vue-mathjax/issues"
   },
   "files": [
-    "dist/*"
+    "dist/*",
+    "types/*"
   ],
   "scripts": {
     "dev": "vite",
