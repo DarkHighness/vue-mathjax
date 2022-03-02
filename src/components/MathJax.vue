@@ -8,16 +8,16 @@ import {
   getCurrentInstance,
   nextTick,
   onUpdated,
-  onUnmounted
+  onUnmounted,
 } from "vue";
-import { renderByMathJax, initMathJax } from "../utils/util";
+import { initMathJax, renderByMathJaxQueued } from "../utils/util";
 
 let el: HTMLElement | null;
 
-const renderMathJax = async () => {
+const renderMathJax = () => {
   if (!el) return;
 
-  await renderByMathJax(el);
+  renderByMathJaxQueued(el);
 };
 
 onMounted(() => {

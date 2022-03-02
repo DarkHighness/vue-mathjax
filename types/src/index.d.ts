@@ -4,7 +4,7 @@ declare const _default: {
     install: typeof install;
     MathJax: import("vue").DefineComponent<{}, {
         el: HTMLElement | null;
-        renderMathJax: () => Promise<void>;
+        renderMathJax: () => void;
     }, {}, {}, {}, import("vue").ComponentOptionsMixin, import("vue").ComponentOptionsMixin, import("vue").EmitsOptions, string, import("vue").VNodeProps & import("vue").AllowedComponentProps & import("vue").ComponentCustomProps, Readonly<import("vue").ExtractPropTypes<{}>>, {}>;
     initMathJax: typeof initMathJax;
     renderByMathJax: typeof renderByMathJax;

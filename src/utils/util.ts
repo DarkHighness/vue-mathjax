@@ -1,3 +1,5 @@
+import { debounce } from "throttle-debounce";
+
 let mathJaxInjected = false;
 let mathJaxReady = false;
 let pendingQueue: (
@@ -42,7 +44,7 @@ export function initMathJax(options = {}, callback?: () => void) {
       inlineMath: [["$", "$"]],
       displayMath: [["$$", "$$"]],
       processEnvironments: true,
-      processRefs: true
+      processRefs: true,
     },
     options: {
       skipHtmlTags: [
@@ -53,28 +55,28 @@ export function initMathJax(options = {}, callback?: () => void) {
         "pre",
         "code",
         "annotation",
-        "annotation-xml"
+        "annotation-xml",
       ],
-      ignoreHtmlClass: "tex2jax_ignore"
+      ignoreHtmlClass: "tex2jax_ignore",
     },
     startup: {
       pageReady: () => {
         mathJaxReady = true;
 
-        mathJax().typeset(pendingQueue.map(v => v.el));
+        mathJax().typeset(pendingQueue.map((v) => v.el));
 
-        pendingQueue.forEach(v => {
+        pendingQueue.forEach((v) => {
           if (v.type == "async") v.callback();
         });
 
         pendingQueue.splice(0, pendingQueue.length);
 
         callback && callback();
-      }
+      },
     },
     svg: {
-      fontCache: "global"
-    }
+      fontCache: "global",
+    },
   };
 
   const mergedOptions = Object.assign({}, defaultOptions, options);
@@ -96,17 +98,17 @@ export function renderByMathJaxSync(el: HTMLElement | HTMLElement[]): void {
   if (!mathJaxReady) {
     if (Array.isArray(el)) {
       pendingQueue.concat(
-        el.map(v => {
+        el.map((v) => {
           return {
             type: "sync",
-            el: v
+            el: v,
           };
         })
       );
     } else {
       pendingQueue.push({
         type: "sync",
-        el
+        el,
       });
     }
 
@@ -129,22 +131,70 @@ export async function renderByMathJax(
         for (let i = 0; i < el.length; i++) {
           pendingQueue.push({
             type: "sync",
-            el: el[i]
+            el: el[i],
           });
         }
 
         pendingQueue.push({
           type: "async",
           el: el[el.length - 1],
-          callback: resolve
+          callback: resolve,
         });
       } else {
         pendingQueue.push({
           type: "async",
           el,
-          callback: resolve
+          callback: resolve,
         });
       }
     }
   });
+}
+
+let waitingQueue: Set<HTMLElement> = new Set<HTMLElement>();
+let doRendering = () => {
+  let batch: HTMLElement[] = [];
+
+  for (const el of waitingQueue.values()) {
+    batch.push(el);
+
+    (window as any).MathJax.typeset(batch);
+  }
+
+  waitingQueue.clear();
+};
+
+let debouncedRendering = debounce(500, false, doRendering);
+
+export function renderByMathJaxQueued(
+  el: HTMLElement | HTMLElement[],
+  flush: boolean = false
+) {
+  if (!mathJaxReady) {
+    if (Array.isArray(el)) {
+      pendingQueue.concat(
+        el.map((v) => {
+          return {
+            type: "sync",
+            el: v,
+          };
+        })
+      );
+    } else {
+      pendingQueue.push({ type: "sync", el });
+    }
+  }
+
+  if (Array.isArray(el)) {
+    el.forEach((v) => waitingQueue.add(v));
+  } else {
+    waitingQueue.add(el);
+  }
+
+  if (flush) {
+    debouncedRendering.cancel();
+    doRendering();
+  } else {
+    debouncedRendering();
+  }
 }

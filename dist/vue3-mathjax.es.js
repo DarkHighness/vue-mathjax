@@ -1,4 +1,54 @@
 import { defineComponent, onMounted, getCurrentInstance, nextTick, onUpdated, onUnmounted, renderSlot } from "vue";
+function throttle(delay, noTrailing, callback, debounceMode) {
+  var timeoutID;
+  var cancelled = false;
+  var lastExec = 0;
+  function clearExistingTimeout() {
+    if (timeoutID) {
+      clearTimeout(timeoutID);
+    }
+  }
+  function cancel() {
+    clearExistingTimeout();
+    cancelled = true;
+  }
+  if (typeof noTrailing !== "boolean") {
+    debounceMode = callback;
+    callback = noTrailing;
+    noTrailing = void 0;
+  }
+  function wrapper() {
+    for (var _len = arguments.length, arguments_ = new Array(_len), _key = 0; _key < _len; _key++) {
+      arguments_[_key] = arguments[_key];
+    }
+    var self = this;
+    var elapsed = Date.now() - lastExec;
+    if (cancelled) {
+      return;
+    }
+    function exec() {
+      lastExec = Date.now();
+      callback.apply(self, arguments_);
+    }
+    function clear() {
+      timeoutID = void 0;
+    }
+    if (debounceMode && !timeoutID) {
+      exec();
+    }
+    clearExistingTimeout();
+    if (debounceMode === void 0 && elapsed > delay) {
+      exec();
+    } else if (noTrailing !== true) {
+      timeoutID = setTimeout(debounceMode ? clear : exec, debounceMode === void 0 ? delay - elapsed : delay);
+    }
+  }
+  wrapper.cancel = cancel;
+  return wrapper;
+}
+function debounce(delay, atBegin, callback) {
+  return callback === void 0 ? throttle(delay, atBegin, false) : throttle(delay, callback, atBegin !== false);
+}
 let mathJaxInjected = false;
 let mathJaxReady = false;
 let pendingQueue = [];
@@ -107,13 +157,48 @@ async function renderByMathJax(el) {
     }
   });
 }
+let waitingQueue = /* @__PURE__ */ new Set();
+let doRendering = () => {
+  let batch = [];
+  for (const el of waitingQueue.values()) {
+    batch.push(el);
+    window.MathJax.typeset(batch);
+  }
+  waitingQueue.clear();
+};
+let debouncedRendering = debounce(500, false, doRendering);
+function renderByMathJaxQueued(el, flush = false) {
+  if (!mathJaxReady) {
+    if (Array.isArray(el)) {
+      pendingQueue.concat(el.map((v) => {
+        return {
+          type: "sync",
+          el: v
+        };
+      }));
+    } else {
+      pendingQueue.push({ type: "sync", el });
+    }
+  }
+  if (Array.isArray(el)) {
+    el.forEach((v) => waitingQueue.add(v));
+  } else {
+    waitingQueue.add(el);
+  }
+  if (flush) {
+    debouncedRendering.cancel();
+    doRendering();
+  } else {
+    debouncedRendering();
+  }
+}
 const _sfc_main = /* @__PURE__ */ defineComponent({
   setup(__props) {
     let el;
-    const renderMathJax = async () => {
+    const renderMathJax = () => {
       if (!el)
         return;
-      await renderByMathJax(el);
+      renderByMathJaxQueued(el);
     };
     onMounted(() => {
       var _a, _b, _c;
