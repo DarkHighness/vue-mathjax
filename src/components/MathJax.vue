@@ -3,15 +3,21 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, getCurrentInstance, onUpdated, nextTick } from "vue";
+import {
+  onMounted,
+  getCurrentInstance,
+  nextTick,
+  onUpdated,
+  onUnmounted
+} from "vue";
 import { renderByMathJax, initMathJax } from "../utils/util";
 
-let el: HTMLElement;
+let el: HTMLElement | null;
 
 const renderMathJax = async () => {
-  if (el) {
-    await renderByMathJax(el);
-  }
+  if (!el) return;
+
+  await renderByMathJax(el);
 };
 
 onMounted(() => {
@@ -27,8 +33,10 @@ onMounted(() => {
 onUpdated(() => {
   el = getCurrentInstance()?.vnode?.el?.parentNode;
 
-  nextTick(() => {
-    renderMathJax();
-  });
+  renderMathJax();
+});
+
+onUnmounted(() => {
+  el = null;
 });
 </script>

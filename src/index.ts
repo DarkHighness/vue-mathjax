@@ -2,7 +2,7 @@ import MathJax from "./components/MathJax.vue";
 import {
   initMathJax,
   renderByMathJax,
-  renderByMathJaxSync,
+  renderByMathJaxSync
 } from "./utils/util";
 
 function install(Vue: any) {
@@ -14,5 +14,5 @@ export default {
   MathJax,
   initMathJax,
   renderByMathJax,
-  renderByMathJaxSync,
+  renderByMathJaxSync
 };

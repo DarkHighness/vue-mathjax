@@ -3,7 +3,7 @@ declare function install(Vue: any): void;
 declare const _default: {
     install: typeof install;
     MathJax: import("vue").DefineComponent<{}, {
-        el: HTMLElement;
+        el: HTMLElement | null;
         renderMathJax: () => Promise<void>;
     }, {}, {}, {}, import("vue").ComponentOptionsMixin, import("vue").ComponentOptionsMixin, import("vue").EmitsOptions, string, import("vue").VNodeProps & import("vue").AllowedComponentProps & import("vue").ComponentCustomProps, Readonly<import("vue").ExtractPropTypes<{}>>, {}>;
     initMathJax: typeof initMathJax;
